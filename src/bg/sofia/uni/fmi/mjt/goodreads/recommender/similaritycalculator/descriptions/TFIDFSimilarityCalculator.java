@@ -5,19 +5,40 @@ import bg.sofia.uni.fmi.mjt.goodreads.recommender.similaritycalculator.Similarit
 import bg.sofia.uni.fmi.mjt.goodreads.tokenizer.TextTokenizer;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static bg.sofia.uni.fmi.mjt.goodreads.constants.ErrorMessagesConstants.INVALID_NULL_BOOKS;
+import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicNumbersConstants.FIRST_COLUMN;
+import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicNumbersConstants.ZERO_RESULT;
 
 public class TFIDFSimilarityCalculator implements SimilarityCalculator {
+    private Set<Book> books;
+    private TextTokenizer tokenizer;
 
-    public TFIDFSimilarityCalculator(Set<Book> books, TextTokenizer tokenizer) {}
+    public TFIDFSimilarityCalculator(Set<Book> books, TextTokenizer tokenizer) {
+        this.books = books;
+        this.tokenizer = tokenizer;
+    }
 
     /*
      * Do not modify!
      */
+    /**
+     * Calculates the similarity between two books.
+     *
+     * @return a double - score of similarity
+     */
     @Override
     public double calculateSimilarity(Book first, Book second) {
+        if (first == null || second == null) {
+            throw new IllegalArgumentException(INVALID_NULL_BOOKS);
+        }
+
         Map<String, Double> tfIdfScoresFirst = computeTFIDF(first);
         Map<String, Double> tfIdfScoresSecond = computeTFIDF(second);
 
@@ -29,11 +50,33 @@ public class TFIDFSimilarityCalculator implements SimilarityCalculator {
     }
 
     public Map<String, Double> computeTF(Book book) {
-        throw new UnsupportedOperationException("Not yet implemented");
+
+        Map<String, Long> words = getWords(book);
+        long wordsCount = getWordsCount(book);
+
+        return words.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> wordsCount == FIRST_COLUMN ? ZERO_RESULT : (double) entry.getValue() / wordsCount
+            ));
     }
 
     public Map<String, Double> computeIDF(Book book) {
         throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    private Map<String, Long> getWords(Book book) {
+        List<String> allWords = tokenizer.tokenize(book.description());
+
+        return allWords.stream()
+            .collect(Collectors.groupingBy(
+                word -> word,
+                Collectors.counting()
+            ));
+    }
+
+    private long getWordsCount(Book book) {
+        return tokenizer.tokenize(book.description()).size();
     }
 
     private double cosineSimilarity(Map<String, Double> first, Map<String, Double> second) {

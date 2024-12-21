@@ -10,4 +10,6 @@ public class MagicNumbersConstants {
     public static final int SEVENTH_COLUMN = 6;
     public static final int EIGHTH_COLUMN = 7;
     public static final int SIZE_OF_COLUMNS = 8;
+
+    public static final double ZERO_RESULT = 0.0;
 }

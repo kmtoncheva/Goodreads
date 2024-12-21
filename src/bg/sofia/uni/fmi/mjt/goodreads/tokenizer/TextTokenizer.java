@@ -6,6 +6,12 @@ import java.io.Reader;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicSymbolsConstants.EMPTY_STRING;
+import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicSymbolsConstants.PUNCT_REGEX;
+import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicSymbolsConstants.SPACE;
+import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicSymbolsConstants.SPACES_REGEX;
 
 public class TextTokenizer {
 
@@ -20,7 +26,18 @@ public class TextTokenizer {
     }
 
     public List<String> tokenize(String input) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        if (input == null || input.isEmpty()) {
+            return List.of();
+        }
+
+        return Stream.of(input.toLowerCase()
+                .replaceAll(PUNCT_REGEX, EMPTY_STRING)
+                .replaceAll(SPACES_REGEX, SPACE)
+                .trim()
+                .split(SPACE))
+            .filter(token -> !token.isEmpty())
+            .filter(token -> !stopwords.contains(token))
+            .toList();
     }
 
     public Set<String> stopwords() {

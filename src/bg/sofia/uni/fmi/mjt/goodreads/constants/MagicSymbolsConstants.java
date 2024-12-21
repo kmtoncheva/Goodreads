@@ -7,4 +7,8 @@ public class MagicSymbolsConstants {
     public static final String COMMA_SPACE = ", ";
     public static final String COMMA = ",";
     public static final String SINGLE_QUOTE = "'";
+    public static final String SPACE = " ";
+
+    public static final String PUNCT_REGEX = "\\p{Punct}";
+    public static final String SPACES_REGEX = "\\s+";
 }
