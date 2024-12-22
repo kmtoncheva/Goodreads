@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static bg.sofia.uni.fmi.mjt.goodreads.constants.ErrorMessagesConstants.LOAD_DATASET_ERROR;
 import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicSymbolsConstants.EMPTY_STRING;
 import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicSymbolsConstants.PUNCT_REGEX;
 import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicSymbolsConstants.SPACE;
@@ -21,7 +22,7 @@ public class TextTokenizer {
         try (var br = new BufferedReader(stopwordsReader)) {
             stopwords = br.lines().collect(Collectors.toSet());
         } catch (IOException ex) {
-            throw new IllegalArgumentException("Could not load dataset", ex);
+            throw new IllegalArgumentException(LOAD_DATASET_ERROR, ex);
         }
     }
 

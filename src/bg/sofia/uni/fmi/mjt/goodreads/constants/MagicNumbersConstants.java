@@ -11,5 +11,7 @@ public class MagicNumbersConstants {
     public static final int EIGHTH_COLUMN = 7;
     public static final int SIZE_OF_COLUMNS = 8;
 
-    public static final double ZERO_RESULT = 0.0;
+    public static final double ZERO_DBl = 0.0;
+    public static final long ZERO_LONG = 0L;
+    public static final double ONE_HUNDRED = 100.0;
 }

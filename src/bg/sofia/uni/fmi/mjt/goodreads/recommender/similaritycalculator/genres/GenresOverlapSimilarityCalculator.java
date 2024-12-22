@@ -9,7 +9,7 @@ import java.util.Set;
 
 import static bg.sofia.uni.fmi.mjt.goodreads.constants.ErrorMessagesConstants.INVALID_NULL_BOOKS;
 import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicNumbersConstants.FIRST_COLUMN;
-import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicNumbersConstants.ZERO_RESULT;
+import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicNumbersConstants.ZERO_DBl;
 
 public class GenresOverlapSimilarityCalculator implements SimilarityCalculator {
 
@@ -31,7 +31,7 @@ public class GenresOverlapSimilarityCalculator implements SimilarityCalculator {
         int minLen = Math.min(firstGenres.size(), secondGenres.size());
 
         if (minLen == FIRST_COLUMN) {
-            return ZERO_RESULT;
+            return ZERO_DBl;
         }
 
         return (double) intersectionCount / minLen;

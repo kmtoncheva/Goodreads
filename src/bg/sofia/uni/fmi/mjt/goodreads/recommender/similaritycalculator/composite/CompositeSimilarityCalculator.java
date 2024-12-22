@@ -6,14 +6,17 @@ import bg.sofia.uni.fmi.mjt.goodreads.recommender.similaritycalculator.Similarit
 import java.util.Map;
 
 public class CompositeSimilarityCalculator implements SimilarityCalculator {
+    Map<SimilarityCalculator, Double> similarityCalculatorMap;
 
     public CompositeSimilarityCalculator(Map<SimilarityCalculator, Double> similarityCalculatorMap) {
-
+        this.similarityCalculatorMap = similarityCalculatorMap;
     }
 
     @Override
     public double calculateSimilarity(Book first, Book second) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return similarityCalculatorMap.entrySet().stream()
+            .mapToDouble(entry -> entry.getKey().calculateSimilarity(first, second) * entry.getValue())
+            .sum();
     }
 
 }

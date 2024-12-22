@@ -14,7 +14,10 @@ import java.util.stream.Collectors;
 
 import static bg.sofia.uni.fmi.mjt.goodreads.constants.ErrorMessagesConstants.INVALID_NULL_BOOKS;
 import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicNumbersConstants.FIRST_COLUMN;
-import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicNumbersConstants.ZERO_RESULT;
+import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicNumbersConstants.ONE_HUNDRED;
+import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicNumbersConstants.SECOND_COLUMN;
+import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicNumbersConstants.ZERO_LONG;
+import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicNumbersConstants.ZERO_DBl;
 
 public class TFIDFSimilarityCalculator implements SimilarityCalculator {
     private Set<Book> books;
@@ -27,11 +30,6 @@ public class TFIDFSimilarityCalculator implements SimilarityCalculator {
 
     /*
      * Do not modify!
-     */
-    /**
-     * Calculates the similarity between two books.
-     *
-     * @return a double - score of similarity
      */
     @Override
     public double calculateSimilarity(Book first, Book second) {
@@ -46,23 +44,52 @@ public class TFIDFSimilarityCalculator implements SimilarityCalculator {
     }
 
     public Map<String, Double> computeTFIDF(Book book) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        Map<String, Double> resTF = computeTF(book);
+        Map<String, Double> resIDF = computeIDF(book);
+
+        return multiplyValues(resTF, resIDF);
+    }
+
+    public Map<String, Double> multiplyValues(Map<String, Double> map1, Map<String, Double> map2) {
+        return map1.keySet().stream()
+            .collect(Collectors.toMap(
+                key -> key,
+                key -> map1.get(key) * map2.get(key)
+            ));
     }
 
     public Map<String, Double> computeTF(Book book) {
-
         Map<String, Long> words = getWords(book);
         long wordsCount = getWordsCount(book);
 
         return words.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
-                entry -> wordsCount == FIRST_COLUMN ? ZERO_RESULT : (double) entry.getValue() / wordsCount
+                entry -> wordsCount == FIRST_COLUMN ? ZERO_DBl : (double) entry.getValue() / wordsCount
             ));
     }
 
     public Map<String, Double> computeIDF(Book book) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        Map<String, Double> idfMap = new HashMap<>();
+        List<String> allWords = tokenizer.tokenize(book.description());
+        long booksCount = books.size();
+
+        Map<String, Long> wordBookCount = new HashMap<>();
+        for (Book cur : books) {
+            Set<String> uniqueWords = new HashSet<>(tokenizer.tokenize(cur.description()));
+            for (String word : uniqueWords) {
+                wordBookCount.put(word, wordBookCount.getOrDefault(word, ZERO_LONG) + SECOND_COLUMN);
+            }
+        }
+
+        for (String word : allWords) {
+            long booksWithSameWord = wordBookCount.getOrDefault(word, ZERO_LONG);
+            double idf = (booksWithSameWord != ZERO_DBl) ? Math.log10((double) booksCount / booksWithSameWord) :
+                ZERO_DBl;
+            idfMap.put(word, idf);
+        }
+
+        return idfMap;
     }
 
     private Map<String, Long> getWords(Book book) {
@@ -98,7 +125,7 @@ public class TFIDFSimilarityCalculator implements SimilarityCalculator {
     private double magnitude(Collection<Double> input) {
         double squaredMagnitude = input.stream()
             .map(v -> v * v)
-            .reduce(0.0, Double::sum);
+            .reduce(ZERO_DBl, Double::sum);
 
         return Math.sqrt(squaredMagnitude);
     }
