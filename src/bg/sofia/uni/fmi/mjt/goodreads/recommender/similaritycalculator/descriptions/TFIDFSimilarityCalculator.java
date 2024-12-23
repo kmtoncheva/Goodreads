@@ -14,10 +14,9 @@ import java.util.stream.Collectors;
 
 import static bg.sofia.uni.fmi.mjt.goodreads.constants.ErrorMessagesConstants.INVALID_NULL_BOOKS;
 import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicNumbersConstants.FIRST_COLUMN;
-import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicNumbersConstants.ONE_HUNDRED;
 import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicNumbersConstants.SECOND_COLUMN;
 import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicNumbersConstants.ZERO_LONG;
-import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicNumbersConstants.ZERO_DBl;
+import static bg.sofia.uni.fmi.mjt.goodreads.constants.MagicNumbersConstants.ZERO_DBL;
 
 public class TFIDFSimilarityCalculator implements SimilarityCalculator {
     private Set<Book> books;
@@ -65,7 +64,7 @@ public class TFIDFSimilarityCalculator implements SimilarityCalculator {
         return words.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
-                entry -> wordsCount == FIRST_COLUMN ? ZERO_DBl : (double) entry.getValue() / wordsCount
+                entry -> wordsCount == FIRST_COLUMN ? ZERO_DBL : (double) entry.getValue() / wordsCount
             ));
     }
 
@@ -84,8 +83,8 @@ public class TFIDFSimilarityCalculator implements SimilarityCalculator {
 
         for (String word : allWords) {
             long booksWithSameWord = wordBookCount.getOrDefault(word, ZERO_LONG);
-            double idf = (booksWithSameWord != ZERO_DBl) ? Math.log10((double) booksCount / booksWithSameWord) :
-                ZERO_DBl;
+            double idf = (booksWithSameWord != ZERO_DBL) ? Math.log10((double) booksCount / booksWithSameWord) :
+                ZERO_DBL;
             idfMap.put(word, idf);
         }
 
@@ -125,7 +124,7 @@ public class TFIDFSimilarityCalculator implements SimilarityCalculator {
     private double magnitude(Collection<Double> input) {
         double squaredMagnitude = input.stream()
             .map(v -> v * v)
-            .reduce(ZERO_DBl, Double::sum);
+            .reduce(ZERO_DBL, Double::sum);
 
         return Math.sqrt(squaredMagnitude);
     }

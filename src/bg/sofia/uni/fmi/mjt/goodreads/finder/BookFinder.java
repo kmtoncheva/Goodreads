@@ -3,11 +3,15 @@ package bg.sofia.uni.fmi.mjt.goodreads.finder;
 import bg.sofia.uni.fmi.mjt.goodreads.book.Book;
 import bg.sofia.uni.fmi.mjt.goodreads.tokenizer.TextTokenizer;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static bg.sofia.uni.fmi.mjt.goodreads.constants.ErrorMessagesConstants.AUTHOR_NAME_ERROR;
+import static bg.sofia.uni.fmi.mjt.goodreads.constants.ErrorMessagesConstants.INVALID_GENRES_ERROR;
+import static bg.sofia.uni.fmi.mjt.goodreads.constants.ErrorMessagesConstants.INVALID_KEYWORDS_ERROR;
 
 public class BookFinder implements BookFinderAPI {
 
@@ -25,7 +29,7 @@ public class BookFinder implements BookFinderAPI {
 
     @Override
     public List<Book> searchByAuthor(String authorName) {
-        if(authorName == null || authorName.isEmpty()) {
+        if (authorName == null || authorName.isEmpty() || authorName.isBlank()) {
             throw new IllegalArgumentException(AUTHOR_NAME_ERROR);
         }
 
@@ -41,33 +45,47 @@ public class BookFinder implements BookFinderAPI {
             .collect(Collectors.toSet());
     }
 
-    /**
-     * Searches for books that belong to the specified genres.
-     * The search can be based on different match options (all or any genres).
-     *
-     * @param genres a Set of genres to search for.
-     * @throws IllegalArgumentException if {@param genres} is null
-     * @return a List of books that match the given genres according to the MatchOption
-     *         Returns an empty list if no books are found.
-     */
     @Override
     public List<Book> searchByGenres(Set<String> genres, MatchOption option) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        if (genres == null) {
+            throw new IllegalArgumentException(INVALID_GENRES_ERROR);
+        }
+
+        return books.stream()
+            .filter(book -> matchesGenres(book, genres, option))
+            .toList();
     }
 
-    /**
-     * Searches for books that match the specified keywords.
-     * The search can be based on different match options (all or any keywords).
-     *
-     * @param keywords a {@code Set} of keywords to search for.
-     * @param option the {@code MatchOption} that defines the search criteria
-     *               (either {@link MatchOption#MATCH_ALL} or {@link MatchOption#MATCH_ANY}).
-     * @return a List of books in which the title or description match the given keywords according to the MatchOption
-     *         Returns an empty list if no books are found.
-     */
+    private boolean matchesGenres(Book book, Set<String> genres, MatchOption option) {
+        return switch (option) {
+            case MATCH_ANY -> book.genres().stream().anyMatch(genres::contains);
+            case MATCH_ALL -> new HashSet<>(book.genres()).containsAll(genres);
+        };
+    }
+
     @Override
     public List<Book> searchByKeywords(Set<String> keywords, MatchOption option) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        if (keywords == null) {
+            throw new IllegalArgumentException(INVALID_KEYWORDS_ERROR);
+        }
+
+        return books.stream()
+            .filter(book -> matchesKeywords(book, keywords, option))
+            .toList();
+    }
+
+    private boolean matchesKeywords(Book book, Set<String> keywords, MatchOption option) {
+        List<String> tokens = new ArrayList<>(textTokenizer.tokenize(book.description()));
+        tokens.addAll(textTokenizer.tokenize(book.title()));
+
+        Set<String> lowerCaseKeywords = keywords.stream()
+            .map(String::toLowerCase)
+            .collect(Collectors.toSet());
+
+        return switch (option) {
+            case MATCH_ANY -> tokens.stream().anyMatch(lowerCaseKeywords::contains);
+            case MATCH_ALL -> new HashSet<>(tokens).containsAll(lowerCaseKeywords);
+        };
     }
 
 }
